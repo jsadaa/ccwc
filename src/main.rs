@@ -34,7 +34,7 @@ fn main() {
 
             if let Ok(mut file) = File::open(path) {
                 let res: String = process::execute(opt, &mut file);
-                println!("{:>8} {}", res, filename);
+                println!("{} {}", res, filename);
             } else {
                 println!("{}: {}: open: Permission denied", env::args().next().unwrap(), filename);
             }
@@ -46,7 +46,7 @@ fn main() {
 
             let res: String = process::execute(opt, &mut fake_file);
 
-            println!("{:>8}", res);
+            println!("{}", res);
         }
     };
 }

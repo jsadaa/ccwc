@@ -11,16 +11,24 @@ fn create_buffer(source: &mut dyn Read) -> Cursor<Vec<u8>> {
 pub fn execute(opt: Opt, source: &mut dyn Read) -> String {
     match opt {
         Opt::Bytes => {
-            parser::count_bytes(source).to_string()
+            let buffer = create_buffer(source);
+            let result = parser::count_bytes(&mut buffer.clone());
+            format!("{:>8}", result)
         },
         Opt::Lines => {
-            parser::count_lines(source).to_string()
+            let buffer = create_buffer(source);
+            let result = parser::count_lines(&mut buffer.clone());
+            format!("{:>8}", result)
         },
         Opt::Words => {
-            parser::count_words(source).to_string()
+            let buffer = create_buffer(source);
+            let result = parser::count_words(&mut buffer.clone());
+            format!("{:>8}", result)
         },
         Opt::Chars => {
-            parser::count_chars(source).to_string()
+            let buffer = create_buffer(source);
+            let result = parser::count_chars(&mut buffer.clone());
+            format!("{:>8}", result)
         }
         Opt::All => {
             let buffer = create_buffer(source);
@@ -30,7 +38,7 @@ pub fn execute(opt: Opt, source: &mut dyn Read) -> String {
                 execute(Opt::Bytes, &mut buffer.clone()),
             ];
 
-            results.iter().fold(String::new(), |acc, x| format!("{}{:>8}", acc, x))
+            format!("{:>8}{:>8}{:>8}", results[0], results[1], results[2])
         }
     }
 }
