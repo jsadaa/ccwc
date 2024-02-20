@@ -2,55 +2,51 @@ mod options;
 mod parser;
 mod process;
 
-use std::env;
+use std::{env, io};
+use std::fs::File;
+use std::io::{Cursor, Read};
 use std::path::Path;
+use crate::options::Opt;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let arg_1: &str;
-    let arg_2: &str;
+    let mut args = env::args().skip(1);
 
-    match args.len() {
-        2 => {
-            arg_1 = "-clw";
-            arg_2 = args.get(1).unwrap();
-        },
-        3 => {
-            arg_1 = args.get(1).unwrap();
-            arg_2 = args.get(2).unwrap();
-        }
-        _ => {
-            println!("usage: {} [-clwm] [file ...]", args[0]);
-            return;
-        }
-    }
-
-    let file = Path::new(arg_2);
-
-    let opt = match options::get_opt(arg_1) {
-        Ok(res) => {
-            res
-        },
-        Err(msg) => {
-            println!("{}: {}", args[0], msg);
-            println!("usage: {} [-clwm] [file ...]", args[0]);
+    let arg_1 = match args.next() {
+        Some(arg) => arg,
+        None => {
+            println!("Usage: {} [-clwm] [file ...]", env::args().next().unwrap());
             return;
         }
     };
 
-    if !file.exists() {
-        println!("{}: {}: open: No such file or directory", args[0], arg_2);
-        return;
-    }
+    let (opt, filename) = match options::get_opt(&arg_1) {
+        Ok(res) => (res, args.next()),
+        Err(_) => (Opt::All, Some(arg_1)),
+    };
 
-    let res: Result<String, String> = process::execute(opt, file);
+    match filename {
+        Some(filename) => {
+            let path = Path::new(&filename);
+            if !path.exists() {
+                println!("{}: {}: open: No such file or directory", env::args().next().unwrap(), filename);
+                return;
+            }
 
-    match res {
-        Ok(s) => {
-            println!("{:>8} {}", s, arg_2)
-        },
-        Err(msg) => {
-            println!("{} {}", args[0], msg)
+            if let Ok(mut file) = File::open(path) {
+                let res: String = process::execute(opt, &mut file);
+                println!("{:>8} {}", res, filename);
+            } else {
+                println!("{}: {}: open: Permission denied", env::args().next().unwrap(), filename);
+            }
         }
-    }
+        None => {
+            let mut buffer = String::new();
+            io::stdin().read_to_string(&mut buffer).expect("Failed to read from stdin");
+            let mut fake_file = Cursor::new(buffer);
+
+            let res: String = process::execute(opt, &mut fake_file);
+
+            println!("{:>8}", res);
+        }
+    };
 }

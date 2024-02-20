@@ -1,69 +1,36 @@
-use std::path::Path;
+use std::io::{Cursor, Read};
 use crate::options::Opt;
 use crate::parser;
 
-pub fn execute(opt: Opt, path: &Path) -> Result<String, String> {
+fn create_buffer(source: &mut dyn Read) -> Cursor<Vec<u8>> {
+    let mut buffer = Vec::new();
+    source.read_to_end(&mut buffer).unwrap();
+    Cursor::new(buffer)
+}
+
+pub fn execute(opt: Opt, source: &mut dyn Read) -> String {
     match opt {
         Opt::Bytes => {
-            match parser::count_bytes(path) {
-                Ok(res) => {
-                    Ok(res.to_string())
-                },
-                Err(msg) => {
-                    Err(msg)
-                }
-            }
+            parser::count_bytes(source).to_string()
         },
         Opt::Lines => {
-            match parser::count_lines(path) {
-                Ok(res) => {
-                    Ok(res.to_string())
-                },
-                Err(msg) => {
-                    Err(msg)
-                }
-            }
+            parser::count_lines(source).to_string()
         },
         Opt::Words => {
-            match parser::count_words(path) {
-                Ok(res) => {
-                    Ok(res.to_string())
-                },
-                Err(msg) => {
-                    Err(msg)
-                }
-            }
+            parser::count_words(source).to_string()
         },
-        Opt::Characters => {
-            match parser::count_chars(path) {
-                Ok(res) => {
-                    Ok(res.to_string())
-                },
-                Err(msg) => {
-                    Err(msg)
-                }
-            }
-        },
+        Opt::Chars => {
+            parser::count_chars(source).to_string()
+        }
         Opt::All => {
-            let mut results: Vec<Result<String, String>> = vec![execute(Opt::Lines, path)];
-            results.push(execute(Opt::Words, path));
-            results.push(execute(Opt::Bytes, path));
+            let buffer = create_buffer(source);
+            let results = [
+                execute(Opt::Lines, &mut buffer.clone()),
+                execute(Opt::Words, &mut buffer.clone()),
+                execute(Opt::Bytes, &mut buffer.clone()),
+            ];
 
-            let mut err: Option<Result<String, String>> = None;
-            let mut format: String = String::from("");
-
-            for result in results {
-                match result {
-                    Ok(res) => format = format!("{}{:>8}", format, res),
-                    Err(msg) => err = Some(Err(msg))
-                }
-            }
-
-            if let Some(res) = err{
-                Err(res.unwrap())
-            } else {
-                Ok(format)
-            }
-        },
+            results.iter().fold(String::new(), |acc, x| format!("{}{:>8}", acc, x))
+        }
     }
 }
