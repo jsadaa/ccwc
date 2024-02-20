@@ -4,7 +4,7 @@ use std::io::{BufRead, Read};
 use std::path::Path;
 
 pub fn count_bytes(path: &Path) -> Result<usize, String> {
-    let file= File::open(path);
+    let file = File::open(path);
     let mut total_bytes: usize = 0;
 
     if let Ok(file) = file {
