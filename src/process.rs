@@ -3,12 +3,11 @@ use crate::options::Opt;
 use crate::parser;
 
 pub fn execute(opt: Opt, path: &Path) -> Result<String, String> {
-
     match opt {
         Opt::Bytes => {
             match parser::count_bytes(path) {
-                Ok(c) => {
-                    Ok(c.to_string())
+                Ok(res) => {
+                    Ok(res.to_string())
                 },
                 Err(msg) => {
                     Err(msg)
@@ -17,8 +16,8 @@ pub fn execute(opt: Opt, path: &Path) -> Result<String, String> {
         },
         Opt::Lines => {
             match parser::count_lines(path) {
-                Ok(c) => {
-                    Ok(c.to_string())
+                Ok(res) => {
+                    Ok(res.to_string())
                 },
                 Err(msg) => {
                     Err(msg)
@@ -27,8 +26,8 @@ pub fn execute(opt: Opt, path: &Path) -> Result<String, String> {
         },
         Opt::Words => {
             match parser::count_words(path) {
-                Ok(c) => {
-                    Ok(c.to_string())
+                Ok(res) => {
+                    Ok(res.to_string())
                 },
                 Err(msg) => {
                     Err(msg)
@@ -37,8 +36,8 @@ pub fn execute(opt: Opt, path: &Path) -> Result<String, String> {
         },
         Opt::Characters => {
             match parser::count_chars(path) {
-                Ok(c) => {
-                    Ok(c.to_string())
+                Ok(res) => {
+                    Ok(res.to_string())
                 },
                 Err(msg) => {
                     Err(msg)
@@ -55,7 +54,7 @@ pub fn execute(opt: Opt, path: &Path) -> Result<String, String> {
 
             for result in results {
                 match result {
-                    Ok(s) => format = format!("{}{:>8}", format, s),
+                    Ok(res) => format = format!("{}{:>8}", format, res),
                     Err(msg) => err = Some(Err(msg))
                 }
             }
