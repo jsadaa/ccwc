@@ -35,6 +35,7 @@ and then :
 or install the binary in your path and use it as a regular command :
 
 ```bash
+cp ./target/debug/ccwc /usr/local/bin
 ccwc [OPTIONS] [FILE]
 ```
 
