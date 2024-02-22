@@ -11,6 +11,11 @@
 
 ## Usage
 
+> [!IMPORTANT]
+> **Format support**
+> 
+> For now, only text files are supported. The program will not work correctly with other file types.
+
 ```bash
 cargo run -- [OPTIONS] [FILE]
 ```
